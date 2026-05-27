@@ -1,0 +1,28 @@
+---
+/**
+ * Home — SSG (Static Site Generation)
+ *
+ * El fetch se ejecuta una única vez en build time.
+ * El resultado queda embebido en el HTML estático → máximo rendimiento.
+ *
+ * Para regenerar el contenido basta con volver a hacer `pnpm build`.
+ */
+import Layout from '../layouts/Layout.astro';
+import SectionRenderer from '../components/SectionRenderer.astro';
+import { fetchHomeContent } from '../lib/cms';
+
+// ── Fetch en build time ───────────────────────────────────────────────────────
+const homeData = await fetchHomeContent();
+const { children, parent } = homeData;
+const pageTitle = parent.content.fields['name']?.type === 'ezstring'
+  ? parent.content.fields['name'].value
+  : 'Intermundial – Seguros de Viaje';
+---
+
+<Layout title={pageTitle}>
+  <main>
+    {children.map((section) => (
+      <SectionRenderer section={section} />
+    ))}
+  </main>
+</Layout>

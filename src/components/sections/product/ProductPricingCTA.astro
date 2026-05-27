@@ -1,0 +1,117 @@
+---
+/**
+ * ProductPricingCTA — Sección de precios / llamada a la acción.
+ *
+ * Ref: content_v3/block_v3/tabla_comparativa/tabla_un_producto.html.twig
+ *
+ * Diseño simplificado para el POC (la tabla completa requiere
+ * el endpoint de seguros_list con los datos de cobertura):
+ *
+ *   Fondo gris claro (surface-contrast)
+ *   Pretitulo + H2
+ *   Card única con:
+ *     - Nombre del seguro (Totaltravel)
+ *     - Precio "desde X €"
+ *     - CTA "Calcular precio"
+ *   + botón secundario "Ver todas las coberturas"
+ */
+import type { TablaComparativaBasicData } from '../../../lib/types';
+
+interface Props {
+  data:         TablaComparativaBasicData;
+  seguroNombre?: string;
+}
+
+const { data, seguroNombre = 'Totaltravel' } = Astro.props;
+const { pretitulo, titulo, price } = data;
+---
+
+<section
+  class="w-full py-[80px] max-s:py-[56px] mb-[96px] max-s:mb-[64px]"
+  style="background: var(--color-surface-contrast);"
+>
+  <div class="px-32 max-m:px-24 max-xs:px-16">
+
+    <!-- Títular -->
+    <div class="text-center mb-48 max-s:mb-32">
+      {pretitulo && (
+        <p class="text-14 leading-20 text-content-medium font-helvetica-now-regular uppercase tracking-[0.08em] mb-8">
+          {pretitulo}
+        </p>
+      )}
+      {titulo && (
+        <h2 class="font-helvetica-now-medium font-weight-medium text-content-high text-[2rem] leading-[1.15] max-s:text-[1.75rem]">
+          {titulo}
+        </h2>
+      )}
+    </div>
+
+    <!-- Card de precio centrada -->
+    <div class="flex justify-center">
+      <div
+        class="
+          bg-white rounded-16 shadow-medium
+          px-40 py-40 max-xs:px-24
+          flex flex-col items-center text-center
+          w-full max-w-[360px]
+        "
+      >
+        <!-- Nombre del seguro -->
+        <h3 class="text-20 font-weight-medium text-content-high mb-8 leading-28">
+          {seguroNombre}
+        </h3>
+
+        <!-- Divisor -->
+        <div class="w-40 h-[2px] bg-semantic-primary mb-24 rounded-full"></div>
+
+        <!-- Precio -->
+        {price && (
+          <div class="mb-4">
+            <span class="text-14 text-content-low leading-20">Desde</span>
+          </div>
+        )}
+        {price && (
+          <div class="flex items-end gap-4 mb-4">
+            <span class="text-[2.75rem] leading-[1] font-helvetica-now-medium text-semantic-primary">
+              {price}€
+            </span>
+          </div>
+        )}
+        {price && (
+          <p class="text-12 text-content-low mb-32 leading-18">por persona</p>
+        )}
+
+        <!-- CTA principal -->
+        <a
+          href="/seguros-de-viaje"
+          class="
+            w-full flex items-center justify-center
+            py-16 px-32 rounded-8 mb-12
+            bg-semantic-primary text-white text-16 font-weight-medium
+            hover:opacity-90 transition-opacity shadow-low
+          "
+        >
+          Calcular precio
+        </a>
+
+        <!-- CTA secundario -->
+        <a
+          href="/seguros-de-viaje/seguro-totaltravel/coberturas"
+          class="
+            text-14 text-semantic-primary font-weight-medium
+            hover:underline transition-colors
+          "
+        >
+          Ver coberturas detalladas →
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Nota de confianza -->
+    <p class="text-center text-12 text-content-low mt-32 leading-18">
+      Más de 5,7M de clientes confían en nosotros · Atención 24h
+    </p>
+
+  </div>
+</section>

@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+/*
+  ════════════════════════════════════════════════════════════
+  TEMA — migrado desde tailwind.config.js (v3) a Tailwind v4
+  En v4 no existe tailwind.config.js; todo el tema se define
+  aquí con @theme y variables CSS.
+  ════════════════════════════════════════════════════════════
+*/
+@theme {
+
+  /* ─── Colores ────────────────────────────────────────────
+     En v4 un solo namespace --color-* cubre texto, fondo,
+     borde, etc. (reemplaza colors + textColor del v3).
+  ─────────────────────────────────────────────────────────── */
+  --color-content-high:          #131D34;
+  --color-content-mid:           rgba(19, 29, 52, 0.65);
+  --color-content-low:           rgba(19, 29, 52, 0.45);
+  --color-content-oncolor-high:  #FFF;
+  --color-content-oncolor-mid:   rgba(255, 255, 255, 0.75);
+  --color-base:                  #FFF;
+  --color-white:                 #FFF;
+  --color-alt:                   #F2F4F8;
+  --color-overlay:               rgba(19, 29, 52, 0.25);
+
+  --color-surface-blue1:         #EEF6FB;
+  --color-surface-blue2:         #E0F0FF;
+  --color-surface-blue3:         #99C1F0;
+  --color-surface-gray1:         rgba(242, 244, 248, 0.55);
+  --color-surface-gray2:         #E6EAF0;
+  --color-surface-danger:        #FED6CD;
+  --color-surface-succes:        #E8F8F3;
+  --color-surface-alert:         #FFF3E0;
+
+  --color-stroke-low:            rgba(19, 29, 52, 0.10);
+  --color-stroke-mid:            rgba(19, 29, 52, 0.16);
+  --color-stroke-high:           rgba(19, 29, 52, 0.30);
+
+  --color-semantic-primary:      #0080F6;
+  --color-semantic-danger:       #D92626;
+  --color-semantic-success:      #05A36E;
+  --color-semantic-warning:      #EA9F2D;
+  --color-semantic-primary-mana: #00783F;
+
+  /* ─── Espaciado (spacing, margin, padding comparten escala)
+     Uso: m-2 → 2px | p-16 → 16px | gap-24 → 24px, etc.
+  ─────────────────────────────────────────────────────────── */
+  --spacing-2:   2px;
+  --spacing-4:   4px;
+  --spacing-6:   6px;
+  --spacing-8:   8px;
+  --spacing-12:  12px;
+  --spacing-16:  16px;
+  --spacing-20:  20px;
+  --spacing-24:  24px;
+  --spacing-28:  28px;
+  --spacing-32:  32px;
+  --spacing-36:  36px;
+  --spacing-40:  40px;
+  --spacing-48:  48px;
+  --spacing-50:  50px;
+  --spacing-52:  52px;
+  --spacing-54:  54px;
+  --spacing-56:  56px;
+  --spacing-64:  64px;
+  --spacing-100: 100px;
+
+  /* ─── Width / Height ─────────────────────────────────────
+     Los valores numéricos de w-* y h-* también heredan el
+     spacing; aquí se añaden los exclusivos de cada eje.
+  ─────────────────────────────────────────────────────────── */
+  --width-20:  20px;
+  --width-24:  24px;
+  --width-28:  28px;
+  --width-40:  40px;
+  --width-48:  48px;
+  --width-120: 120px;
+
+  --height-20: 20px;
+  --height-24: 24px;
+  --height-28: 28px;
+  --height-40: 40px;
+  --height-48: 48px;
+
+  /* ─── Breakpoints ────────────────────────────────────────
+     En v3 eran max-width; en v4 se usan como max-{name}:
+       max-l:   → @media (width < 1440px)   ← equivale a v3 l
+       max-m:   → @media (width < 1280px)   ← equivale a v3 m
+       max-s:   → @media (width < 960px)    ← equivale a v3 s
+       max-xs:  → @media (width < 640px)    ← equivale a v3 xs
+  ─────────────────────────────────────────────────────────── */
+  --breakpoint-xs: 640px;
+  --breakpoint-s:  960px;
+  --breakpoint-m:  1280px;
+  --breakpoint-l:  1440px;
+
+  /* ─── Border Radius ──────────────────────────────────────
+     Uso: rounded-0 | rounded-4 | rounded-8 | rounded-12 | rounded-16
+  ─────────────────────────────────────────────────────────── */
+  --radius-0:  0px;
+  --radius-4:  4px;
+  --radius-8:  8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+
+  /* ─── Box Shadow ─────────────────────────────────────────
+     Uso: shadow-low | shadow-medium | shadow-stroke-low, etc.
+  ─────────────────────────────────────────────────────────── */
+  --shadow-stroke-low:      inset 0 0 0 1px rgba(19, 29, 52, 0.10);
+  --shadow-stroke-mid:      inset 0 0 0 1px rgba(19, 29, 52, 0.16);
+  --shadow-semantic-primary: inset 0 0 0 1px #0080F6;
+  --shadow-semantic-danger:  inset 0 0 0 1px #D92626;
+  --shadow-semantic-success: inset 0 0 0 1px #05A36E;
+  --shadow-semantic-warning: inset 0 0 0 1px #EA9F2D;
+  --shadow-low:    0px 3px 5px 0px rgba(30, 22, 66, 0.08);
+  --shadow-medium: 0px 10px 20px 0px rgba(0, 0, 0, 0.10);
+
+  /* ─── Tipografía — Familia ───────────────────────────────
+     Uso: font-helvetica-now-medium | font-helvetica-now-regular | …
+  ─────────────────────────────────────────────────────────── */
+  --font-helvetica-now-medium:  "Helvetica Now Medium";
+  --font-helvetica-now-regular: "Helvetica Now Regular";
+  --font-helvetica-now-display: "Helvetica Now Display";
+
+  /* ─── Tipografía — Tamaño ────────────────────────────────
+     Uso: text-12 | text-14 | … | text-64
+  ─────────────────────────────────────────────────────────── */
+  --text-12: 12px;
+  --text-14: 14px;
+  --text-16: 16px;
+  --text-18: 18px;
+  --text-20: 20px;
+  --text-22: 22px;
+  --text-24: 24px;
+  --text-26: 26px;
+  --text-28: 28px;
+  --text-32: 32px;
+  --text-36: 36px;
+  --text-44: 44px;
+  --text-56: 56px;
+  --text-64: 64px;
+
+  /* ─── Tipografía — Peso ──────────────────────────────────
+     Uso: font-regular | font-medium
+  ─────────────────────────────────────────────────────────── */
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+
+  /* ─── Tipografía — Tracking (letter-spacing) ─────────────
+     Uso: tracking-0-3 | tracking-0-4 | … | tracking-1-6
+  ─────────────────────────────────────────────────────────── */
+  --tracking-0-3: 0.3px;
+  --tracking-0-4: 0.4px;
+  --tracking-0-5: 0.5px;
+  --tracking-0-6: 0.6px;
+  --tracking-0-8: 0.8px;
+  --tracking-1:   1px;
+  --tracking-1-2: 1.2px;
+  --tracking-1-3: 1.3px;
+  --tracking-1-4: 1.4px;
+  --tracking-1-6: 1.6px;
+
+  /* ─── Tipografía — Leading (line-height) ─────────────────
+     Uso: leading-18 | leading-20 | … | leading-68
+  ─────────────────────────────────────────────────────────── */
+  --leading-18: 18px;
+  --leading-20: 20px;
+  --leading-22: 22px;
+  --leading-24: 24px;
+  --leading-28: 28px;
+  --leading-30: 30px;
+  --leading-32: 32px;
+  --leading-34: 34px;
+  --leading-36: 36px;
+  --leading-40: 40px;
+  --leading-48: 48px;
+  --leading-62: 62px;
+  --leading-68: 68px;
+
+  /* ─── Animaciones ────────────────────────────────────────
+     Uso: animate-fade-in-down | animate-fade-in
+     Los @keyframes se definen fuera del bloque @theme.
+  ─────────────────────────────────────────────────────────── */
+  --animate-fade-in-down: fade-in-down 0.5s ease-out;
+  --animate-fade-in:      fade-in 0.5s ease-in-out;
+}
+
+/* ─── Keyframes ───────────────────────────────────────────── */
+@keyframes fade-in-down {
+  0%   { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fade-down {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── Background gradiente personalizado ─────────────────────
+   Uso: clase bg-tw-dark-gradient
+   (En v4 los backgroundImage del v3 se definen como @utility)
+─────────────────────────────────────────────────────────────── */
+@utility bg-tw-dark-gradient {
+  background-image: linear-gradient(
+    180deg,
+    rgba(19, 29, 52, 0.05)   44.13%,
+    rgba(19, 29, 52, 0.395)  63.92%,
+    rgba(19, 29, 52, 0.44)   83.41%,
+    rgba(19, 29, 52, 0.5)   100%
+  );
+}
+
+/*
+  NOTA — blocklist: ['collapse']
+  En Tailwind v4 no existe la opción `blocklist`.
+  Si necesitas deshabilitar la utilidad `collapse` puedes
+  sobreescribirla con una utilidad vacía:
+
+  @utility collapse {
+    visibility: visible;   ← o quitar la regla por completo
+  }
+*/

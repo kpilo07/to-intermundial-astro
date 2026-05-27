@@ -1,0 +1,84 @@
+---
+/**
+ * ProductIconoTexto — Banner promocional dentro de la hoja de producto.
+ *
+ * Ref: content_v3/block_v3/icono_texto/index.html.twig
+ *
+ * Diseño:
+ *   Banda horizontal de fondo azul ligero (surface-accent)
+ *   [icono | título + descripción + CTA]
+ *   En mobile: columna centrada
+ */
+import type { IconoTextoData } from '../../../lib/types';
+
+const BASE_URL = import.meta.env.CMS_BASE_URL as string;
+
+interface Props {
+  data: IconoTextoData;
+}
+
+const { data } = Astro.props;
+const { subtitulo, contenido, urlContenido, imagen } = data;
+const imagenUri = imagen?.uri ? `${BASE_URL}${imagen.uri}` : null;
+---
+
+<div class="w-full px-32 max-m:px-24 max-xs:px-16 mb-[64px] max-s:mb-[48px]">
+  <div
+    class="
+      flex items-center gap-32 max-s:gap-24 max-xs:flex-col max-xs:text-center
+      rounded-16 px-40 py-32 max-s:px-24 max-xs:px-20 max-s:py-24
+    "
+    style="background: linear-gradient(135deg, #EEF6FF 0%, #E0F0FF 100%);"
+  >
+
+    <!-- Icono -->
+    {imagenUri && (
+      <div class="flex-shrink-0">
+        <img
+          src={imagenUri}
+          alt={imagen?.alt || ''}
+          width="80"
+          height="80"
+          class="w-[80px] h-[80px] max-s:w-[64px] max-s:h-[64px] object-contain"
+          loading="lazy"
+        />
+      </div>
+    )}
+
+    <!-- Texto -->
+    <div class="flex-1 min-w-0">
+      {subtitulo && (
+        <h2 class="
+          font-helvetica-now-medium font-weight-medium text-content-high
+          text-[1.25rem] leading-[1.25] mb-8 max-s:text-[1.125rem]
+        ">
+          {subtitulo}
+        </h2>
+      )}
+      {contenido && (
+        <p class="text-16 max-xs:text-14 leading-24 text-content-medium font-helvetica-now-regular">
+          {contenido}
+        </p>
+      )}
+    </div>
+
+    <!-- CTA -->
+    {urlContenido?.url && (
+      <div class="flex-shrink-0 max-xs:w-full">
+        <a
+          href={urlContenido.url}
+          class="
+            inline-flex items-center justify-center
+            px-24 py-12 rounded-8
+            bg-semantic-primary text-white text-16 font-weight-medium
+            hover:opacity-90 transition-opacity shadow-low
+            max-xs:w-full
+          "
+        >
+          {urlContenido.text || 'Ver más'}
+        </a>
+      </div>
+    )}
+
+  </div>
+</div>

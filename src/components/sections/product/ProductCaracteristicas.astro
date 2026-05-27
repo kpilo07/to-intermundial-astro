@@ -1,0 +1,139 @@
+---
+/**
+ * ProductCaracteristicas — Sección de características del seguro.
+ *
+ * Ref: content_v3/block_v3/miniatura_4/sombreado.html.twig  (tipo=1)
+ *
+ * Diseño (desktop ≥960px):
+ *   Grid 2 col [560px auto]:
+ *     Izquierda: imagen principal del producto (redondeada)
+ *     Derecha:   pretitulo + h2 + acordeón de ítems
+ *
+ * Mobile (<960px):
+ *   Columna: imagen arriba, acordeón abajo
+ *
+ * El acordeón usa solo HTML <details>/<summary> — sin JS externo.
+ */
+import type { CaracteristicasData } from '../../../lib/types';
+
+interface Props {
+  data: CaracteristicasData;
+}
+
+const { data } = Astro.props;
+const { pretitulo, titulo, imagenPrincipal, items } = data;
+---
+
+<section class="w-full px-32 max-m:px-24 max-xs:px-16 mb-[96px] max-s:mb-[64px]">
+
+  <!-- Títular (siempre visible arriba en mobile) -->
+  <div class="mb-40 max-s:mb-32 max-m:hidden">
+    {pretitulo && (
+      <p class="text-14 leading-20 text-content-medium font-helvetica-now-regular uppercase tracking-[0.08em] mb-8">
+        {pretitulo}
+      </p>
+    )}
+    {titulo && (
+      <h2 class="font-helvetica-now-medium font-weight-medium text-content-high text-[2rem] leading-[1.15]">
+        {titulo}
+      </h2>
+    )}
+  </div>
+
+  <div class="
+    grid grid-cols-[560px_1fr] gap-[80px] items-start
+    max-m:flex max-m:flex-col max-m:gap-[40px]
+  ">
+
+    <!-- Columna izquierda: imagen -->
+    {imagenPrincipal && (
+      <div class="max-m:order-2">
+        <img
+          src={imagenPrincipal}
+          alt={titulo || ''}
+          class="w-full max-w-[560px] rounded-16 shadow-medium object-cover"
+          loading="lazy"
+          width="560"
+          height="420"
+        />
+      </div>
+    )}
+
+    <!-- Columna derecha: texto + acordeón -->
+    <div class={imagenPrincipal ? 'max-m:order-1' : 'col-span-2'}>
+
+      <!-- Título (visible en tablet/desktop) -->
+      <div class="mb-32 max-m:mb-24 hidden max-m:block">
+        {pretitulo && (
+          <p class="text-14 leading-20 text-content-medium font-helvetica-now-regular uppercase tracking-[0.08em] mb-8">
+            {pretitulo}
+          </p>
+        )}
+        {titulo && (
+          <h2 class="font-helvetica-now-medium font-weight-medium text-content-high text-[1.75rem] leading-[1.2]">
+            {titulo}
+          </h2>
+        )}
+      </div>
+
+      <!-- Acordeón de ítems -->
+      <div class="flex flex-col">
+        {items.map((item, idx) => (
+          <details
+            class="group border-b border-stroke-low last:border-b-0"
+            open={idx === 0}
+          >
+            <summary class="
+              flex items-center justify-between gap-16
+              py-20 cursor-pointer list-none
+              hover:text-semantic-primary transition-colors
+            ">
+              <h3 class="
+                text-16 leading-24 font-weight-medium text-content-high
+                group-open:text-semantic-primary transition-colors
+              ">
+                {item.titulo}
+              </h3>
+              <!-- Chevron icon -->
+              <svg
+                class="w-20 h-20 flex-shrink-0 text-content-medium transition-transform group-open:rotate-180"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8l5 5 5-5" />
+              </svg>
+            </summary>
+
+            <div class="pb-20 pt-4">
+              <p class="text-16 leading-28 text-content-medium font-helvetica-now-regular">
+                {item.descripcion}
+              </p>
+              {item.url?.url && (
+                <a
+                  href={item.url.url}
+                  class="inline-flex items-center gap-8 mt-12 text-14 text-semantic-primary font-weight-medium hover:underline"
+                >
+                  {item.url.text || 'Ver más'}
+                  <svg class="w-14 h-14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2 7h10M8 3l4 4-4 4" />
+                  </svg>
+                </a>
+              )}
+            </div>
+          </details>
+        ))}
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<style>
+  /* Remove default marker on <summary> across browsers */
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::marker { content: ''; }
+</style>

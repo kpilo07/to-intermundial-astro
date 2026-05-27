@@ -1,0 +1,53 @@
+---
+/**
+ * Sección: "¿Qué dicen de nosotros?" (testimonios)
+ * contentTypeIdentifier: miniatura_3
+ */
+import { str, imageUrl, extractMiniatura3Items } from '../../lib/cms';
+import type { CMSField, Miniatura3Item } from '../../lib/types';
+
+interface Props {
+  fields: Record<string, CMSField>;
+}
+
+const { fields } = Astro.props;
+
+const titulo = str(fields['titulo']);
+const items  = extractMiniatura3Items(fields);
+---
+
+<section class="py-64 px-24">
+  <div class="max-w-[1200px] mx-auto">
+
+    <h2 class="text-28 md:text-36 leading-36 font-weight-medium text-content-high text-center mb-40">
+      {titulo}
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-24">
+      {items.map((item: Miniatura3Item) => {
+        const imgSrc = imageUrl(item.imagen);
+        return (
+          <figure class="flex flex-col gap-16 bg-surface-blue1 rounded-12 p-24 shadow-low">
+            {imgSrc && (
+              <div class="w-full h-[160px] rounded-8 overflow-hidden">
+                <img
+                  src={imgSrc}
+                  alt={item.imagen?.alt ?? item.titulo}
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <blockquote class="text-14 leading-22 text-content-mid italic flex-1">
+              "{item.descripcion}"
+            </blockquote>
+            <figcaption class="text-14 font-weight-medium text-content-high">
+              — {item.titulo}
+            </figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  </div>
+</section>

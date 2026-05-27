@@ -1,0 +1,79 @@
+---
+/**
+ * Dispatcher que elige el componente correcto según contentTypeIdentifier.
+ *
+ * Con depth=2, sections con hijos (como seccion_render → cabecera_block)
+ * ya vienen con `section.children` populado.
+ */
+import type { CMSChild } from '../lib/types';
+import {
+  extractImagenTexto,
+  fetchHeaderTags,
+  extractHeaderData,
+} from '../lib/cms';
+
+import HeaderHero          from './sections/HeaderHero.astro';
+import ImagenTexto         from './sections/ImagenTexto.astro';
+import Miniatura4          from './sections/Miniatura4.astro';
+import Miniatura3          from './sections/Miniatura3.astro';
+import PreguntasFrecuentes from './sections/PreguntasFrecuentes.astro';
+import BannerMedios        from './sections/BannerMedios.astro';
+
+interface Props {
+  section: CMSChild;
+}
+
+const { section } = Astro.props;
+const { contentTypeIdentifier, fields } = section.content;
+
+// ─── Header: seccion_render → cabecera_block + item_icon tags ────────────────
+let headerData = null;
+if (contentTypeIdentifier === 'seccion_render') {
+  const cabeceraBlock = section.children?.find(
+    (c) => c.content.contentTypeIdentifier === 'cabecera_block'
+  );
+  if (cabeceraBlock) {
+    // Los tags (item_icon) son hijos del cabecera_block; se buscan en paralelo
+    const tags = await fetchHeaderTags(cabeceraBlock.locationId);
+    headerData = extractHeaderData(cabeceraBlock, tags);
+  }
+}
+---
+
+<!-- ── Header hero ── -->
+{contentTypeIdentifier === 'seccion_render' && headerData && (
+  <HeaderHero header={headerData} />
+)}
+
+<!-- ── Imagen + Texto ── -->
+{contentTypeIdentifier === 'imagen_texto' && (
+  <ImagenTexto data={extractImagenTexto(fields)} />
+)}
+
+<!-- ── Blog ── -->
+{contentTypeIdentifier === 'miniatura_4' && (
+  <Miniatura4 fields={fields} />
+)}
+
+<!-- ── Testimonios ── -->
+{contentTypeIdentifier === 'miniatura_3' && (
+  <Miniatura3 fields={fields} />
+)}
+
+<!-- ── FAQ ── -->
+{contentTypeIdentifier === 'preguntas_frecuentes' && (
+  <PreguntasFrecuentes fields={fields} />
+)}
+
+<!-- ── Medios ── -->
+{contentTypeIdentifier === 'banner_medios' && (
+  <BannerMedios fields={fields} />
+)}
+
+<!--
+  Tipos pendientes:
+    seccion                        → Listado de productos (requiere hijos)
+    relacion_galeria_card_3_elem.  → Relación a otro objeto CMS
+    block_widget                   → Widget externo de opiniones
+    carrusel_container             → Carousel (requiere JS)
+-->

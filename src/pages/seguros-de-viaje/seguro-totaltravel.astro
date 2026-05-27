@@ -1,0 +1,99 @@
+---
+/**
+ * /seguros-de-viaje/seguro-totaltravel
+ *
+ * Hoja de producto del seguro Totaltravel (CMS location 123).
+ * SSG: todo el contenido se pre-renderiza en build time.
+ *
+ * Secciones:
+ *   1. CabeceraSeguro     — header con imagen de fondo responsiva
+ *   2. ProductIconoTexto  — banner eSIM / promo
+ *   3. ProductCaracteristicas — acordeón de características con imagen
+ *   4. ProductPricingCTA  — card de precio y botón de contratación
+ *   5. ProductVentajas    — grid de ventajas (miniatura_3)
+ */
+import Layout                  from '../../layouts/Layout.astro';
+import { fetchProductPage }    from '../../lib/cms';
+import CabeceraSeguro          from '../../components/sections/product/CabeceraSeguro.astro';
+import ProductIconoTexto       from '../../components/sections/product/ProductIconoTexto.astro';
+import ProductCaracteristicas  from '../../components/sections/product/ProductCaracteristicas.astro';
+import ProductPricingCTA       from '../../components/sections/product/ProductPricingCTA.astro';
+import ProductVentajas         from '../../components/sections/product/ProductVentajas.astro';
+
+// CMS location ID para el seguro Totaltravel
+const TOTALTRAVEL_ID = import.meta.env.CMS_TOTALTRAVEL_LOCATION_ID ?? '123';
+
+const product = await fetchProductPage(TOTALTRAVEL_ID);
+
+if (!product) {
+  // Redirige a 404 si no se encuentra el contenido
+  return Astro.redirect('/404', 404);
+}
+
+const { cabecera, structuredData, iconoTexto, caracteristicas, tablaComparativa, ventajas } = product;
+
+// SEO meta
+const pageTitle       = structuredData.titulo
+  ? `${structuredData.titulo} | Intermundial`
+  : 'Seguro de viaje internacional Totaltravel | Intermundial';
+const pageDescription = structuredData.description ||
+  'Seguro de viaje internacional Totaltravel. Cobertura médica hasta 5.000.000€, 35 causas de anulación y asistencia 24h.';
+
+// Structured data (schema.org Product)
+const schemaOrg = JSON.stringify({
+  '@context': 'https://schema.org/',
+  '@type': 'Product',
+  name: structuredData.titulo,
+  description: structuredData.description,
+  brand: 'Intermundial',
+  offers: {
+    '@type': 'Offer',
+    url: 'https://www.intermundial.es/seguros-de-viaje/seguro-totaltravel',
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    price: structuredData.offersPrice,
+  },
+  aggregateRating: structuredData.ratingValue
+    ? {
+        '@type': 'AggregateRating',
+        ratingValue: structuredData.ratingValue,
+        reviewCount: structuredData.ratingCount,
+        bestRating: '5',
+        worstRating: '1',
+      }
+    : undefined,
+});
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json" set:html={schemaOrg} slot="head" />
+
+  <!-- ── 1. Cabecera del producto ─────────────────────────────────────── -->
+  <CabeceraSeguro cabecera={cabecera} structuredData={structuredData} />
+
+  <!-- ── 2. Promo eSIM / IconoTexto ──────────────────────────────────── -->
+  {iconoTexto && iconoTexto.subtitulo && (
+    <ProductIconoTexto data={iconoTexto} />
+  )}
+
+  <!-- ── 3. Características (accordion + imagen) ─────────────────────── -->
+  {caracteristicas && caracteristicas.items.length > 0 && (
+    <ProductCaracteristicas data={caracteristicas} />
+  )}
+
+  <!-- ── 4. Pricing CTA ──────────────────────────────────────────────── -->
+  {tablaComparativa && (
+    <ProductPricingCTA data={tablaComparativa} seguroNombre="Totaltravel" />
+  )}
+
+  <!-- ── 5. Ventajas de contratar (miniatura_3) ──────────────────────── -->
+  {ventajas && ventajas.length > 0 && (
+    <ProductVentajas items={ventajas} />
+  )}
+
+  <!-- ── Separador final ─────────────────────────────────────────────── -->
+  <div class="pb-[64px]"></div>
+
+</Layout>

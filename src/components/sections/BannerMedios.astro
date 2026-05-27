@@ -1,0 +1,55 @@
+---
+/**
+ * Sección: "Hablan de nosotros" (logos de medios)
+ * contentTypeIdentifier: banner_medios
+ */
+import { str, imageUrl, extractBannerMediosItems } from '../../lib/cms';
+import type { CMSField, BannerMediosItem } from '../../lib/types';
+
+interface Props {
+  fields: Record<string, CMSField>;
+}
+
+const { fields } = Astro.props;
+
+const titulo = str(fields['titulo']);
+const items  = extractBannerMediosItems(fields);
+---
+
+<section class="py-48 px-24 border-t border-stroke-low">
+  <div class="max-w-[1200px] mx-auto">
+
+    {titulo && (
+      <p class="text-14 font-weight-medium tracking-1-2 uppercase text-content-mid text-center mb-32">
+        {titulo}
+      </p>
+    )}
+
+    <div class="flex flex-wrap items-center justify-center gap-32">
+      {items.map((item: BannerMediosItem) => {
+        const imgSrc = imageUrl(item.imagen);
+        if (!imgSrc) return null;
+        return (
+          <a
+            href={item.url.url ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="opacity-60 hover:opacity-100 transition-opacity"
+            aria-label={item.imagen.alt || 'Medio de comunicación'}
+          >
+            <img
+              src={imgSrc}
+              alt={item.imagen.alt ?? ''}
+              width={item.imagen.width}
+              height={item.imagen.height}
+              loading="lazy"
+              decoding="async"
+              class="h-[40px] w-auto object-contain"
+            />
+          </a>
+        );
+      })}
+    </div>
+
+  </div>
+</section>

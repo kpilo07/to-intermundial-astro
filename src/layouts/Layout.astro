@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import NavBar from '../components/NavBar.astro';
+import Footer from '../components/Footer.astro';
+import { fetchMenuContent, fetchFooterContent } from '../lib/cms';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title       = 'Intermundial – Seguros de Viaje',
+  description = 'Seguros de viaje para particulares y empresas. Líderes en cobertura y experiencia digital.',
+} = Astro.props;
+
+// Fetch del menú y footer en build time — cacheados a nivel de módulo entre páginas
+const [menu, footer] = await Promise.all([
+  fetchMenuContent(),
+  fetchFooterContent(),
+]);
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<!-- Named slot: children can inject preloads, JSON-LD, etc. into <head> -->
+		<slot name="head" />
+	</head>
+	<body>
+		<NavBar menu={menu} />
+		<slot />
+		<Footer footer={footer} />
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+</style>
