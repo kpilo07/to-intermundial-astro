@@ -1,0 +1,85 @@
+---
+import Layout                  from '../../../layouts/Layout.astro';
+import { fetchProductPage, LOCALE_TO_CMS_LANG } from '../../../lib/cms';
+import CabeceraSeguro          from '../../../components/sections/product/CabeceraSeguro.astro';
+import ProductIconoTexto       from '../../../components/sections/product/ProductIconoTexto.astro';
+import ProductCaracteristicas  from '../../../components/sections/product/ProductCaracteristicas.astro';
+import ProductPricingCTA       from '../../../components/sections/product/ProductPricingCTA.astro';
+import ProductVentajas         from '../../../components/sections/product/ProductVentajas.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'it' } },
+    { params: { lang: 'pt' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const cmsLang = LOCALE_TO_CMS_LANG[lang] ?? lang;
+
+const TOTALTRAVEL_ID = import.meta.env.CMS_TOTALTRAVEL_LOCATION_ID ?? '123';
+
+const product = await fetchProductPage(TOTALTRAVEL_ID, cmsLang);
+
+if (!product) {
+  return Astro.redirect('/404', 404);
+}
+
+const { cabecera, structuredData, iconoTexto, caracteristicas, tablaComparativa, ventajas } = product;
+
+const pageTitle       = structuredData.titulo
+  ? `${structuredData.titulo} | Intermundial`
+  : 'Seguro de viaje internacional Totaltravel | Intermundial';
+const pageDescription = structuredData.description ||
+  'Seguro de viaje internacional Totaltravel. Cobertura médica hasta 5.000.000€, 35 causas de anulación y asistencia 24h.';
+
+const schemaOrg = JSON.stringify({
+  '@context': 'https://schema.org/',
+  '@type': 'Product',
+  name: structuredData.titulo,
+  description: structuredData.description,
+  brand: 'Intermundial',
+  offers: {
+    '@type': 'Offer',
+    url: 'https://www.intermundial.es/seguros-de-viaje/seguro-totaltravel',
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    price: structuredData.offersPrice,
+  },
+  aggregateRating: structuredData.ratingValue
+    ? {
+        '@type': 'AggregateRating',
+        ratingValue: structuredData.ratingValue,
+        reviewCount: structuredData.ratingCount,
+        bestRating: '5',
+        worstRating: '1',
+      }
+    : undefined,
+});
+---
+
+<Layout title={pageTitle} description={pageDescription} lang={lang}>
+
+  <script type="application/ld+json" set:html={schemaOrg} slot="head" />
+
+  <CabeceraSeguro cabecera={cabecera} structuredData={structuredData} />
+
+  {iconoTexto && iconoTexto.subtitulo && (
+    <ProductIconoTexto data={iconoTexto} />
+  )}
+
+  {caracteristicas && caracteristicas.items.length > 0 && (
+    <ProductCaracteristicas data={caracteristicas} />
+  )}
+
+  {tablaComparativa && (
+    <ProductPricingCTA data={tablaComparativa} seguroNombre="Totaltravel" />
+  )}
+
+  {ventajas && ventajas.length > 0 && (
+    <ProductVentajas items={ventajas} />
+  )}
+
+  <div class="pb-[64px]"></div>
+
+</Layout>

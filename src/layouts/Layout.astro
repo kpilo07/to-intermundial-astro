@@ -7,22 +7,24 @@ import { fetchMenuContent, fetchFooterContent } from '../lib/cms';
 interface Props {
   title?: string;
   description?: string;
+  lang?: string;
 }
 
 const {
   title       = 'Intermundial – Seguros de Viaje',
   description = 'Seguros de viaje para particulares y empresas. Líderes en cobertura y experiencia digital.',
+  lang,
 } = Astro.props;
 
 // Fetch del menú y footer en build time — cacheados a nivel de módulo entre páginas
 const [menu, footer] = await Promise.all([
-  fetchMenuContent(),
-  fetchFooterContent(),
+  fetchMenuContent(lang),
+  fetchFooterContent(lang),
 ]);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang ?? Astro.currentLocale ?? 'es'}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />

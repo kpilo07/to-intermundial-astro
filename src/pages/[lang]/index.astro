@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SectionRenderer from '../../components/SectionRenderer.astro';
+import { fetchHomeContent, LOCALE_TO_CMS_LANG } from '../../lib/cms';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'it' } },
+    { params: { lang: 'pt' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const cmsLang = LOCALE_TO_CMS_LANG[lang] ?? lang;
+
+const homeData = await fetchHomeContent(cmsLang);
+const { children, parent } = homeData;
+const pageTitle = parent.content.fields['name']?.type === 'ezstring'
+  ? parent.content.fields['name'].value
+  : 'Intermundial – Seguros de Viaje';
+---
+
+<Layout title={pageTitle} lang={lang}>
+  <main>
+    {children.map((section) => (
+      <SectionRenderer section={section} />
+    ))}
+  </main>
+</Layout>

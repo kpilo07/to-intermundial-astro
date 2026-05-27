@@ -25,6 +25,13 @@ import type {
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
+/** Mapeo de locale Astro (código estándar) → código de idioma del CMS */
+export const LOCALE_TO_CMS_LANG: Record<string, string> = {
+  es: 'esl-ES',
+  it: 'ita-IT',
+  pt: 'por-PT',
+};
+
 const BASE_URL  = import.meta.env.CMS_BASE_URL as string;
 const API_KEY   = import.meta.env.CMS_API_KEY  as string;
 const LANG      = import.meta.env.CMS_LANG     as string;
@@ -48,9 +55,10 @@ async function fetchLocation(
   locationId: string | number,
   limit = 50,
   depth?: number,
+  lang: string = LANG,
 ): Promise<CMSHomeResponse> {
   const depthParam = depth !== undefined ? `&depth=${depth}` : '';
-  const fetchUrl = `${BASE_URL}/apicms/fullcontent/${locationId}?lang=${LANG}&limit=${limit}${depthParam}`;
+  const fetchUrl = `${BASE_URL}/apicms/fullcontent/${locationId}?lang=${lang}&limit=${limit}${depthParam}`;
   const res = await fetch(fetchUrl, { headers: { 'X-Api-Key': API_KEY } });
   if (!res.ok) throw new Error(`CMS fetch failed [${res.status}]: ${fetchUrl}`);
   return res.json() as Promise<CMSHomeResponse>;
@@ -67,8 +75,8 @@ function absoluteUri(uri: string | null | undefined): string | null {
  * Uses depth=2 to get nested children (e.g. cabecera_block inside seccion_render).
  * Called at build time → output is fully pre-rendered (SSG).
  */
-export async function fetchHomeContent(): Promise<CMSHomeResponse> {
-  const url = `${BASE_URL}/apicms/fullcontent/${HOME_ID}?lang=${LANG}&limit=20&depth=2`;
+export async function fetchHomeContent(lang: string = LANG): Promise<CMSHomeResponse> {
+  const url = `${BASE_URL}/apicms/fullcontent/${HOME_ID}?lang=${lang}&limit=20&depth=2`;
   const res = await fetch(url, { headers: { 'X-Api-Key': API_KEY } });
   if (!res.ok) throw new Error(`CMS fetch failed [${res.status}]: ${url}`);
   return res.json() as Promise<CMSHomeResponse>;
@@ -169,8 +177,8 @@ const PRODUCT_PAGE_URLS: Record<number, string> = {
   2127:  '/seguros-deportivos',                               // Todos los seguros deportivos
 };
 
-/** Cache de módulo: en SSG todas las páginas comparten el mismo proceso Node.js */
-let _menuCache: MenuData | null = null;
+/** Cache de módulo por idioma: en SSG todas las páginas comparten el mismo proceso Node.js */
+const _menuCaches = new Map<string, MenuData>();
 
 function childToMenuItem(child: CMSChild): MenuItem {
   const f = child.content.fields;
@@ -210,15 +218,15 @@ function childToMenuItem(child: CMSChild): MenuItem {
  *    ├─ 109  Seguros de viaje      ← nav principal con relacion_multiple
  *    └─ 133  Seguros deportivos    ← nav principal con relacion_multiple
  */
-export async function fetchMenuContent(): Promise<MenuData> {
-  if (_menuCache) return _menuCache;
+export async function fetchMenuContent(lang: string = LANG): Promise<MenuData> {
+  if (_menuCaches.has(lang)) return _menuCaches.get(lang)!;
 
   // 4 peticiones en paralelo
   const [rootData, submenusData, leftData, rightData] = await Promise.all([
-    fetchLocation(MENU_LOCATION_ID),
-    fetchLocation(SUBMENUS_LOCATION_ID),
-    fetchLocation(TOP_LEFT_LOCATION_ID),
-    fetchLocation(TOP_RIGHT_LOCATION_ID),
+    fetchLocation(MENU_LOCATION_ID,     50, undefined, lang),
+    fetchLocation(SUBMENUS_LOCATION_ID, 50, undefined, lang),
+    fetchLocation(TOP_LEFT_LOCATION_ID, 50, undefined, lang),
+    fetchLocation(TOP_RIGHT_LOCATION_ID, 50, undefined, lang),
   ]);
 
   // Solo items de tipo 'enlaces' en el root son los ítems principales del nav
@@ -226,14 +234,15 @@ export async function fetchMenuContent(): Promise<MenuData> {
     (c) => c.content.contentTypeIdentifier === 'enlaces',
   );
 
-  _menuCache = {
+  const result: MenuData = {
     topBarLeft:  leftData.children.map(childToMenuItem),
     topBarRight: rightData.children.map(childToMenuItem),
     mainNav:     mainNavChildren.map(childToMenuItem),
     submenus:    submenusData.children.map(childToMenuItem),
   };
 
-  return _menuCache;
+  _menuCaches.set(lang, result);
+  return result;
 }
 
 // ─── Field helpers ────────────────────────────────────────────────────────────
@@ -371,8 +380,8 @@ export function extractBannerMediosItems(
  *       • estructura_navegacion_producto  → schema.org fields (price, rating …)
  *   All fields are available at that depth.
  */
-export async function fetchProductPage(locationId: string | number): Promise<ProductPageData | null> {
-  const data = await fetchLocation(locationId, 20, 2);
+export async function fetchProductPage(locationId: string | number, lang: string = LANG): Promise<ProductPageData | null> {
+  const data = await fetchLocation(locationId, 20, 2, lang);
 
   // ── Key nodes ──────────────────────────────────────────────────────────────
   const resumenNode       = data.children.find(c => c.content.contentTypeIdentifier === 'resumen');
@@ -485,8 +494,8 @@ export async function fetchProductPage(locationId: string | number): Promise<Pro
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
-/** Cache de módulo para el footer */
-let _footerCache: FooterData | null = null;
+/** Cache de módulo para el footer por idioma */
+const _footerCaches = new Map<string, FooterData>();
 
 /**
  * Fetches and assembles the full footer data.
@@ -506,14 +515,14 @@ let _footerCache: FooterData | null = null;
  * NOTA: relacion_multiple almacena content IDs (child.content.id),
  * NO location IDs (child.locationId).
  */
-export async function fetchFooterContent(): Promise<FooterData> {
-  if (_footerCache) return _footerCache;
+export async function fetchFooterContent(lang: string = LANG): Promise<FooterData> {
+  if (_footerCaches.has(lang)) return _footerCaches.get(lang)!;
 
   const [rootData, submenusData, legalLeftData, legalRightData] = await Promise.all([
-    fetchLocation(FOOTER_LOCATION_ID, 50),
-    fetchLocation(FOOTER_SUBMENUS_LOCATION_ID, 80),
-    fetchLocation(FOOTER_LEGAL_LEFT_ID),
-    fetchLocation(FOOTER_LEGAL_RIGHT_ID),
+    fetchLocation(FOOTER_LOCATION_ID,          50, undefined, lang),
+    fetchLocation(FOOTER_SUBMENUS_LOCATION_ID, 80, undefined, lang),
+    fetchLocation(FOOTER_LEGAL_LEFT_ID,        50, undefined, lang),
+    fetchLocation(FOOTER_LEGAL_RIGHT_ID,       50, undefined, lang),
   ]);
 
   // Mapa por content ID (no locationId) para cruzar con relacion_multiple
@@ -569,11 +578,12 @@ export async function fetchFooterContent(): Promise<FooterData> {
     };
   };
 
-  _footerCache = {
+  const footerResult: FooterData = {
     columns,
     legalLeft:  legalLeftData.children.map(toLegalItem),
     legalRight: legalRightData.children.map(toLegalItem),
   };
 
-  return _footerCache;
+  _footerCaches.set(lang, footerResult);
+  return footerResult;
 }
